@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>구리지구촌교회 비전성가대 연습실</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    
+    * {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .mesh-gradient {
+      background: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.06) 0px, transparent 50%),
+                  radial-gradient(at 50% 100%, rgba(241, 245, 249, 1) 0px, transparent 50%);
+    }
+
+    .glass-header {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 mesh-gradient text-slate-800 min-h-screen pb-16 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="glass-header border-b border-slate-200/80 sticky top-0 z-30 transition-all duration-200">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="music-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold tracking-wider text-indigo-600 uppercase block -mb-0.5">Vision Choir</span>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            구리지구촌교회 비전성가대
+          </h1>
+        </div>
+      </div>
+
+      <button 
+        onclick="openSongModal()" 
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm hover:shadow-md hover:shadow-indigo-200/50 active:scale-95 transition-all duration-150"
+      >
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <span>곡 등록</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+
+    <!-- Search Bar -->
+    <div class="relative group">
+      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+      </div>
+      <input 
+        type="text" 
+        id="searchInput" 
+        oninput="handleSearch()"
+        placeholder="찬양 제목 또는 날짜(예: 2026.08.30 또는 08.30) 검색..." 
+        class="w-full pl-10 pr-4 py-3 bg-white/90 border border-slate-200/90 rounded-2xl text-sm placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm transition duration-200"
+      >
+    </div>
+
+    <!-- Part Selector Pills with Distinct Colors -->
+    <div>
+      <div class="p-1.5 bg-slate-200/60 backdrop-blur rounded-2xl flex items-center gap-1 border border-slate-200/60 shadow-inner">
+        <button onclick="changePart('all')" data-part="all" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+          합창
+        </button>
+        <button onclick="changePart('soprano')" data-part="soprano" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+          소프라노
+        </button>
+        <button onclick="changePart('alto')" data-part="alto" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+          알토
+        </button>
+        <button onclick="changePart('tenor')" data-part="tenor" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+          테너
+        </button>
+        <button onclick="changePart('bass')" data-part="bass" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+          베이스
+        </button>
+      </div>
+    </div>
+
+    <!-- Song List Container -->
+    <div class="glass-card rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div id="songList" class="divide-y divide-slate-100/80">
+        <div class="py-20 text-center text-slate-400">
+          <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2.5 animate-spin text-indigo-500"></i>
+          <p class="text-sm font-medium">찬양곡 목록을 불러오는 중...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Add Song Modal -->
+  <div id="songModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform translate-y-8 sm:translate-y-0 sm:scale-95 transition-all duration-200 max-h-[90vh] flex flex-col" id="songModalContent">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">새 찬양곡 등록</h3>
+          <p class="text-xs text-slate-500 mt-0.5">각 파트별 유튜브 링크를 입력해 주세요.</p>
+        </div>
+        <button onclick="closeSongModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form -->
+      <form id="songForm" onsubmit="saveSong(event)" class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">찬양 일자</label>
+            <input type="date" id="songDate" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">곡 제목</label>
+            <input type="text" id="songTitle" required placeholder="예: 은혜 아니면" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 space-y-3">
+          <label class="block text-xs font-bold text-slate-700 tracking-wide">파트별 유튜브 링크</label>
+          
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-16 text-xs font-bold text-indigo-600 shrink-0">전체 합창</span>
+              <input type="url" id="linkAll" placeholder="https://youtu.be/..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-16 text-xs font-bold text-rose-500 shrink-0">소프라노</span>
+              <input type="url" id="linkSoprano" placeholder="https://youtu.be/..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-rose-500">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-16 text-xs font-bold text-amber-600 shrink-0">알토</span>
+              <input type="url" id="linkAlto" placeholder="https://youtu.be/..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-amber-500">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-16 text-xs font-bold text-emerald-600 shrink-0">테너</span>
+              <input type="url" id="linkTenor" placeholder="https://youtu.be/..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-16 text-xs font-bold text-sky-600 shrink-0">베이스</span>
+              <input type="url" id="linkBass" placeholder="https://youtu.be/..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeSongModal()" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">취소</button>
+          <button type="submit" id="submitBtn" class="px-5 py-2.5 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm hover:shadow active:scale-95 transition-all flex items-center gap-1.5">
+            <span>저장하기</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwC-bh65c7C9BdptG-XcTxnqsyUqtudTrFta-VQknbNXP3gVMnw0XySDj_1hODwc8U/exec";
+
+    let songs = [];
+    let currentPart = 'all';
+    let searchQuery = '';
+
+    // Part theme color mapping
+    const PART_THEMES = {
+      all: {
+        active: "bg-indigo-600 text-white shadow-md shadow-indigo-200",
+        badge: "text-indigo-700 bg-indigo-50 border-indigo-100/80 group-hover:bg-indigo-100/90",
+        hover: "hover:bg-indigo-50/50 group-hover:text-indigo-900",
+        icon: "group-hover:text-indigo-600 group-hover:bg-indigo-100/60"
+      },
+      soprano: {
+        active: "bg-rose-500 text-white shadow-md shadow-rose-200",
+        badge: "text-rose-700 bg-rose-50 border-rose-100/80 group-hover:bg-rose-100/90",
+        hover: "hover:bg-rose-50/50 group-hover:text-rose-900",
+        icon: "group-hover:text-rose-600 group-hover:bg-rose-100/60"
+      },
+      alto: {
+        active: "bg-amber-500 text-white shadow-md shadow-amber-200",
+        badge: "text-amber-700 bg-amber-50 border-amber-100/80 group-hover:bg-amber-100/90",
+        hover: "hover:bg-amber-50/50 group-hover:text-amber-900",
+        icon: "group-hover:text-amber-600 group-hover:bg-amber-100/60"
+      },
+      tenor: {
+        active: "bg-emerald-600 text-white shadow-md shadow-emerald-200",
+        badge: "text-emerald-700 bg-emerald-50 border-emerald-100/80 group-hover:bg-emerald-100/90",
+        hover: "hover:bg-emerald-50/50 group-hover:text-emerald-900",
+        icon: "group-hover:text-emerald-600 group-hover:bg-emerald-100/60"
+      },
+      bass: {
+        active: "bg-sky-600 text-white shadow-md shadow-sky-200",
+        badge: "text-sky-700 bg-sky-50 border-sky-100/80 group-hover:bg-sky-100/90",
+        hover: "hover:bg-sky-50/50 group-hover:text-sky-900",
+        icon: "group-hover:text-sky-600 group-hover:bg-sky-100/60"
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updatePartTabUI();
+      fetchSongs();
+    });
+
+    async function fetchSongs() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        songs = Array.isArray(data) ? data : [];
+        renderSongList();
+      } catch (err) {
+        console.error(err);
+        renderError("찬양곡 목록을 불러오는 중 오류가 발생했습니다.");
+      }
+    }
+
+    function renderError(message) {
+      const container = document.getElementById('songList');
+      container.innerHTML = `
+        <div class="py-14 px-4 text-center text-rose-500">
+          <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2 text-rose-400"></i>
+          <p class="text-sm font-semibold">${message}</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function changePart(part) {
+      currentPart = part;
+      updatePartTabUI();
+      renderSongList();
+    }
+
+    function updatePartTabUI() {
+      const partButtons = document.querySelectorAll('.part-btn');
+      partButtons.forEach(btn => {
+        const part = btn.dataset.part;
+        if (part === currentPart) {
+          btn.className = `part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${PART_THEMES[part].active}`;
+        } else {
+          btn.className = 'part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 hover:bg-white/50 transition-all duration-150';
+        }
+      });
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderSongList();
+    }
+
+    function openSongLink(songId, link) {
+      if (!link) return;
+      window.open(link, '_blank');
+
+      const song = songs.find(s => String(s.id) === String(songId));
+      if (song) {
+        song.views = (song.views || 0) + 1;
+        const viewEl = document.getElementById(`views-${songId}`);
+        if (viewEl) viewEl.textContent = song.views;
+      }
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'increment_view', id: String(songId) })
+      }).catch(err => console.error('조회수 전송 오류:', err));
+    }
+
+    function renderSongList() {
+      const container = document.getElementById('songList');
+      const theme = PART_THEMES[currentPart];
+      
+      const filtered = songs
+        .filter(song => {
+          const dateStr = formatDate(song.date);
+          const fullDateStr = formatFullDate(song.date);
+          return (song.title && song.title.toLowerCase().includes(searchQuery)) ||
+                 dateStr.includes(searchQuery) ||
+                 fullDateStr.includes(searchQuery);
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center text-slate-400">
+            <i data-lucide="music" class="w-9 h-9 mx-auto mb-2.5 opacity-20"></i>
+            <p class="text-sm font-medium">등록된 찬양곡이 없습니다.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(song => {
+        const link = song.links ? song.links[currentPart] : '';
+        const hasLink = link && link.trim() !== '';
+        const viewCount = song.views || 0;
+
+        if (hasLink) {
+          return `
+            <div 
+              onclick="openSongLink('${song.id}', '${link}')"
+              class="flex items-center justify-between gap-3.5 px-5 py-4 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer"
+            >
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <span class="text-xs font-bold ${theme.badge} px-2.5 py-1 rounded-lg border shrink-0">
+                  ${formatDate(song.date)}
+                </span>
+                <span class="text-sm sm:text-base font-semibold text-slate-800 ${theme.hover} truncate">
+                  ${song.title}
+                </span>
+              </div>
+              
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="flex items-center gap-1 text-xs text-slate-400 group-hover:text-slate-500 font-medium">
+                  <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
+                  <span id="views-${song.id}">${viewCount}</span>
+                </span>
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-slate-300 ${theme.icon} transition">
+                  <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="flex items-center justify-between gap-3.5 px-5 py-4 bg-slate-50/40 opacity-45 cursor-not-allowed">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-1 rounded-lg shrink-0">
+                  ${formatDate(song.date)}
+                </span>
+                <span class="text-sm sm:text-base font-medium text-slate-500 truncate">
+                  ${song.title}
+                </span>
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                  <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
+                  <span>${viewCount}</span>
+                </span>
+                <span class="text-[11px] text-slate-400 px-2 py-0.5 bg-slate-200/50 rounded">준비중</span>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // 날짜 포맷 정리 (ISO 문자열, 타임스탬프, 표준 형식 모두 MM.DD 형태로 깔끔하게 표시)
+    function formatDate(dateInput) {
+      if (!dateInput) return '';
+      const d = new Date(dateInput);
+      if (!isNaN(d.getTime())) {
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${month}.${day}`;
+      }
+      return String(dateInput).replace(/-/g, '.');
+    }
+
+    function formatFullDate(dateInput) {
+      if (!dateInput) return '';
+      const d = new Date(dateInput);
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}.${month}.${day}`;
+      }
+      return String(dateInput).replace(/-/g, '.');
+    }
+
+    // Modal Controls
+    function openSongModal() {
+      const modal = document.getElementById('songModal');
+      const content = document.getElementById('songModalContent');
+      document.getElementById('songForm').reset();
+      
+      const now = new Date();
+      const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      document.getElementById('songDate').value = localDate;
+      
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('translate-y-8', 'sm:scale-95');
+      }, 10);
+    }
+
+    function closeSongModal() {
+      const modal = document.getElementById('songModal');
+      const content = document.getElementById('songModalContent');
+      modal.classList.add('opacity-0');
+      content.classList.add('translate-y-8', 'sm:scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    async function saveSong(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>저장 중...</span>`;
+      lucide.createIcons();
+
+      const newSong = {
+        id: Date.now().toString(),
+        date: document.getElementById('songDate').value,
+        title: document.getElementById('songTitle').value.trim(),
+        links: {
+          all: document.getElementById('linkAll').value.trim(),
+          soprano: document.getElementById('linkSoprano').value.trim(),
+          alto: document.getElementById('linkAlto').value.trim(),
+          tenor: document.getElementById('linkTenor').value.trim(),
+          bass: document.getElementById('linkBass').value.trim()
+        },
+        views: 0
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSong)
+        });
+
+        songs.push(newSong);
+        renderSongList();
+        closeSongModal();
+      } catch (err) {
+        console.error(err);
+        alert('저장 중 문제가 발생했습니다. 스프레드시트 상태를 확인해주세요.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>저장하기</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
