@@ -174,34 +174,31 @@
       </div>
     </div>
 
-    <!-- Part Selector Pills with Distinct Colors -->
+    <!-- Part Selector Pills -->
     <div>
       <div class="p-1.5 bg-slate-200/60 backdrop-blur rounded-2xl flex items-center gap-1 border border-slate-200/60 shadow-inner">
-        <button onclick="changePart('all')" data-part="all" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+        <button onclick="changePart('all')" data-part="all" class="part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
           합창
         </button>
-        <button onclick="changePart('soprano')" data-part="soprano" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+        <button onclick="changePart('soprano')" data-part="soprano" class="part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
           소프라노
         </button>
-        <button onclick="changePart('alto')" data-part="alto" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+        <button onclick="changePart('alto')" data-part="alto" class="part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
           알토
         </button>
-        <button onclick="changePart('tenor')" data-part="tenor" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+        <button onclick="changePart('tenor')" data-part="tenor" class="part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
           테너
         </button>
-        <button onclick="changePart('bass')" data-part="bass" class="part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
+        <button onclick="changePart('bass')" data-part="bass" class="part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200">
           베이스
         </button>
       </div>
     </div>
 
-    <!-- Song List Container -->
+    <!-- Song List or Bible Verse Container -->
     <div class="glass-card rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
       <div id="songList" class="divide-y divide-slate-100/80">
-        <div class="py-20 text-center text-slate-400">
-          <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2.5 animate-spin text-indigo-500"></i>
-          <p class="text-sm font-medium">찬양곡 목록을 불러오는 중...</p>
-        </div>
+        <!-- JS로 렌더링 (초기에는 성경 말씀 표시) -->
       </div>
     </div>
 
@@ -211,7 +208,6 @@
   <div id="songModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform translate-y-8 sm:translate-y-0 sm:scale-95 transition-all duration-200 max-h-[90vh] flex flex-col" id="songModalContent">
       
-      <!-- Modal Header -->
       <div class="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div>
           <h3 class="text-base font-bold text-slate-900">새 찬양곡 등록</h3>
@@ -222,7 +218,6 @@
         </button>
       </div>
 
-      <!-- Modal Form -->
       <form id="songForm" onsubmit="saveSong(event)" class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
@@ -273,11 +268,11 @@
   </div>
 
   <script>
-    // 요청하신 신규 구글 Apps Script 웹 앱 URL 적용
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjHraDCIo9TZrXy6SFzVxfNayAE9YT98FVOoqgf4YC09M2PhSXrKriFPA0VmmLu07M/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2dNeo6UUzC0rVNEei5V6nqG8v9eIBnu3lD6EZaur4jiZDmuC6h6GR1cFroJfcaoyc/exec";
 
     let songs = [];
-    let currentPart = 'all';
+    let isDataLoaded = false;
+    let currentPart = null; // 초기에는 파트 미선택 상태
     let searchQuery = '';
 
     const PART_THEMES = {
@@ -316,7 +311,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       updatePartTabUI();
-      fetchSongs();
+      renderInitialView(); // 초기 성경 구절 카드 렌더링
+      fetchSongs();        // 백그라운드 데이터 로딩
     });
 
     async function fetchSongs() {
@@ -324,11 +320,48 @@
         const res = await fetch(SCRIPT_URL);
         const data = await res.json();
         songs = Array.isArray(data) ? data : [];
-        renderSongList();
+        isDataLoaded = true;
+        // 사용자가 이미 파트 버튼을 눌렀다면 목록 갱신
+        if (currentPart) {
+          renderSongList();
+        }
       } catch (err) {
         console.error(err);
-        renderError("찬양곡 목록을 불러오는 중 오류가 발생했습니다.");
+        isDataLoaded = true;
+        if (currentPart) {
+          renderError("찬양곡 목록을 불러오는 중 오류가 발생했습니다.");
+        }
       }
+    }
+
+    // 초기 화면: 찬양 대표 성경 구절 안내 카드
+    function renderInitialView() {
+      const container = document.getElementById('songList');
+      container.innerHTML = `
+        <div class="px-6 py-12 text-center flex flex-col items-center justify-center">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-4 shadow-sm">
+            <i data-lucide="book-open" class="w-6 h-6"></i>
+          </div>
+          <span class="text-xs font-bold text-indigo-600 tracking-wider uppercase mb-1">Praise & Worship</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-3">찬양의 고백</h2>
+          
+          <div class="max-w-md mx-auto bg-slate-50/70 border border-slate-200/70 rounded-2xl p-5 my-2 shadow-xs">
+            <p class="text-sm sm:text-base font-serif italic text-slate-700 leading-relaxed break-keep">
+              "내가 평생토록 여호와께 노래하며<br>
+              내가 살아 있는 동안 내 하나님을 찬양하리로다"
+            </p>
+            <p class="text-xs font-bold text-indigo-600 mt-2.5 tracking-wide">
+              — 시편 104편 33절 —
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-500 mt-4 flex items-center gap-1.5 font-medium">
+            <i data-lucide="hand-metal" class="w-4 h-4 text-indigo-500"></i>
+            <span>상단의 연습하실 <strong>파트(합창·소프·알토·테너·베이스)</strong>를 선택해 주세요.</span>
+          </p>
+        </div>
+      `;
+      lucide.createIcons();
     }
 
     function renderError(message) {
@@ -342,30 +375,50 @@
       lucide.createIcons();
     }
 
+    // 파트 탭 클릭 핸들러
     function changePart(part) {
       currentPart = part;
       updatePartTabUI();
-      renderSongList();
+      
+      if (!isDataLoaded) {
+        // 데이터 로딩 중인 경우 로딩 스피너 표시
+        const container = document.getElementById('songList');
+        container.innerHTML = `
+          <div class="py-20 text-center text-slate-400">
+            <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2.5 animate-spin text-indigo-500"></i>
+            <p class="text-sm font-medium">찬양곡 목록을 불러오는 중...</p>
+          </div>
+        `;
+        lucide.createIcons();
+      } else {
+        renderSongList();
+      }
     }
 
     function updatePartTabUI() {
       const partButtons = document.querySelectorAll('.part-btn');
       partButtons.forEach(btn => {
         const part = btn.dataset.part;
-        if (part === currentPart) {
-          btn.className = `part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${PART_THEMES[part].active}`;
+        if (currentPart && part === currentPart) {
+          btn.className = `part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${PART_THEMES[part].active}`;
         } else {
-          btn.className = 'part-btn flex-1 py-2 text-center rounded-xl text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 hover:bg-white/50 transition-all duration-150';
+          btn.className = 'part-btn flex-1 py-2.5 text-center rounded-xl text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 hover:bg-white/50 transition-all duration-150';
         }
       });
     }
 
     function handleSearch() {
       searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-      renderSongList();
+      // 검색어가 입력되었는데 파트가 선택되지 않은 경우 기본 'all(합창)' 파트로 자동 전환
+      if (searchQuery && !currentPart) {
+        currentPart = 'all';
+        updatePartTabUI();
+      }
+      if (currentPart) {
+        renderSongList();
+      }
     }
 
-    // 선택된 파트(part)의 조회수만 증가
     function openSongLink(songId, link, part) {
       if (!link) return;
       window.open(link, '_blank');
@@ -381,7 +434,6 @@
         if (viewEl) viewEl.textContent = song.views[part];
       }
 
-      // 파트 정보를 함께 POST 전송
       fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -391,6 +443,7 @@
     }
 
     function renderSongList() {
+      if (!currentPart) return;
       const container = document.getElementById('songList');
       const theme = PART_THEMES[currentPart];
       
@@ -419,7 +472,6 @@
         const link = song.links ? song.links[currentPart] : '';
         const hasLink = link && link.trim() !== '';
         
-        // 현재 선택된 파트 탭의 조회수 추출
         let viewCount = 0;
         if (song.views && typeof song.views === 'object') {
           viewCount = song.views[currentPart] || 0;
@@ -564,7 +616,9 @@
         });
 
         songs.push(newSong);
-        renderSongList();
+        if (currentPart) {
+          renderSongList();
+        }
         closeSongModal();
       } catch (err) {
         console.error(err);
