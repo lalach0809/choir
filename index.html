@@ -74,24 +74,186 @@
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+  <main class="max-w-2xl mx-auto px-4 sm:px-6 py-4 space-y-3.5">
 
-    <!-- 1. 찬양의 고백 글귀 -->
-    <div class="glass-card rounded-3xl border border-slate-200/80 p-5 text-center shadow-sm">
-      <div class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-2 shadow-xs">
-        <i data-lucide="book-open" class="w-5 h-5"></i>
+    <!-- 1. 찬양의 고백 글귀 (기존 대비 약 50% 슬림하게 축소) -->
+    <div class="glass-card rounded-2xl border border-slate-200/80 px-4 py-2.5 shadow-xs flex items-center gap-3">
+      <div class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
+        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
       </div>
-      <span class="text-[10px] font-bold text-indigo-600 tracking-wider uppercase block mb-0.5">Praise & Worship</span>
-      <h2 class="text-sm sm:text-base font-bold text-slate-800 mb-2.5">찬양의 고백</h2>
-      
-      <div class="max-w-md mx-auto bg-slate-50/80 border border-slate-200/70 rounded-2xl p-4 shadow-xs">
-        <p class="text-xs sm:text-sm font-serif italic text-slate-700 leading-relaxed break-keep">
-          "내가 평생토록 여호와께 노래하며<br>
-          내가 살아 있는 동안 내 하나님을 찬양하리로다"
+      <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
+        <p class="text-[11px] sm:text-xs font-serif italic text-slate-700 leading-snug break-keep">
+          "내가 평생토록 여호와께 노래하며 내가 살아 있는 동안 내 하나님을 찬양하리로다"
         </p>
-        <p class="text-[11px] font-bold text-indigo-600 mt-2 tracking-wide">
-          — 시편 104편 33절 —
-        </p>
+        <span class="text-[10px] font-bold text-indigo-600 shrink-0 whitespace-nowrap self-end sm:self-auto">
+          — 시편 104:33 —
+        </span>
+      </div>
+    </div>
+
+    <!-- 2026 성탄 칸타타 섹션 (주일 찬양 섹션 바로 위) -->
+    <div class="space-y-2.5">
+      <div class="p-3.5 bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-emerald-50/90 border border-rose-200/80 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white shadow-sm shadow-rose-200">
+              <i data-lucide="gift" class="w-3.5 h-3.5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-rose-600 uppercase block -mb-1">Christmas Cantata 2026</span>
+              <span class="text-xs sm:text-sm font-bold text-slate-900">2026 성탄 칸타타 <span class="text-slate-600 font-medium text-xs">〈빛이 있으라〉</span></span>
+            </div>
+          </div>
+          <a 
+            href="https://www.youtube.com/playlist?list=PLKUCahxm6cNI" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 inline-flex items-center gap-0.5 bg-white/80 px-2 py-1 rounded-lg border border-rose-200/80 shadow-2xs"
+          >
+            <span>합창 연속재생</span>
+            <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+          </a>
+        </div>
+
+        <!-- 칸타타 개요 & 곡별 해설 토글 카드 -->
+        <div class="mt-2.5 bg-white/90 border border-rose-200/70 rounded-xl overflow-hidden shadow-2xs transition-all">
+          <button 
+            type="button"
+            onclick="toggleCantataOverview()"
+            class="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-rose-50/50 transition duration-150"
+          >
+            <div class="flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-rose-500 shrink-0"></i>
+              <span class="text-xs font-bold text-slate-800">칸타타 개요 및 곡별 해설</span>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] font-semibold text-rose-600">
+              <span id="cantataToggleText">해설 보기</span>
+              <i id="cantataToggleIcon" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+            </div>
+          </button>
+
+          <!-- 접혀있는 해설 내용 본문 -->
+          <div id="cantataOverviewContent" class="hidden border-t border-rose-100/80 px-3.5 py-3 space-y-3 bg-slate-50/40 text-xs text-slate-700 max-h-[300px] overflow-y-auto custom-scrollbar">
+            
+            <!-- 곡 1 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">1. 빛이 있으라</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">03'20"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">주제 및 시작:</strong> 태초의 말씀과 성탄의 빛을 하나의 맥락으로 바라보며 칸타타를 시작함</li>
+                <li><strong class="text-slate-700">음악적 동기:</strong> 캐럴 「기쁘다 구주 오셨네」와 부활절 칸타타 「길, 진리, 생명」의 동기를 결합해 창조·구속·성탄·부활이 하나로 이어진 구속사임을 암시함</li>
+                <li><strong class="text-slate-700">음악적 전개:</strong> 반복되는 "빛이 있으라" 외침이 점차 확대되며 혼돈이 질서로 전환되는 과정을 묘사함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 2 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">2. 말씀이 들려온다</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">04'04"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">주제 및 배경:</strong> 침묵 속에서 울리는 하나님의 말씀을 표현하며, 「곧 오소서 임마누엘」 선율을 바탕으로 삼음</li>
+                <li><strong class="text-slate-700">분위기 전환:</strong> 어두운 분위기로 출발하여 점차 음역과 화성이 확장되면서 약속의 말씀이 품은 희망을 드러냄</li>
+                <li><strong class="text-slate-700">후반부 묘사:</strong> 오랜 기다림이 환희와 기쁨으로 변하는 순간을 형상화함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 3 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">3. 임마누엘로 오셨도다</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">04'04"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">주제 의식:</strong> 지극히 높으신 하나님이 가장 낮은 자리로 임하신 성육신의 신비를 다룸</li>
+                <li><strong class="text-slate-700">분위기 조성:</strong> 잔잔한 선율과 반복적인 할렐루야를 통해 오래된 전통 성탄 찬송과 유사한 은혜로운 분위기 형성</li>
+                <li><strong class="text-slate-700">클라이맥스:</strong> "그 말씀이 육신 되셔서" 부분에서 화성과 음향을 점진적으로 확장하여 하늘의 영광이 이 땅 위에 임하는 장면을 구현함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 4 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">4. 천사들의 노래가</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">01'26"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">곡의 성격:</strong> 천군 천사의 찬양이 하늘에서 메아리치듯 울려 퍼지는 모습을 담은 경쾌한 연결 곡</li>
+                <li><strong class="text-slate-700">구성 및 참여:</strong> 익숙한 찬송가 캐럴 선율에 단순·명료하고 밝은 화성을 얹어 회중과 어린이 찬양대가 함께 부를 수 있는 순수한 기쁨 부여</li>
+                <li><strong class="text-slate-700">역할:</strong> 성탄의 기쁨을 노래하면서 다음 곡으로 자연스럽게 전환되는 가교 구실을 함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 5 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">5. 영광의 찬송을 올리자</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">03'18"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">공간적 확장:</strong> 하늘 천사의 찬양이 목자들의 찬양을 거쳐 땅 위의 인간에게 전달되는 흐름을 묘사함</li>
+                <li><strong class="text-slate-700">리듬 및 메시지:</strong> 천상의 선포가 인간의 노래로 체화되는 과정을 목가적이고 경쾌한 리듬으로 표현</li>
+                <li><strong class="text-slate-700">후렴과 현재성:</strong> "하늘에는 영광, 땅에는 평화"를 후렴으로 반복하며 베들레헴 들판의 찬양이 오늘날 성도의 삶과 예배 속에서도 지속됨을 찬미함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 6 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">6. 가자, 경배의 길로</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">04'26"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">주제:</strong> 동방박사들의 행보를 단순한 이동이 아닌 영적 '믿음의 순례'로 해석함</li>
+                <li><strong class="text-slate-700">음악적 추진력:</strong> 쉬지 않고 전진하는 리듬과 단계적으로 고조되는 음악적 진행을 통해 경배를 향한 결단과 여정을 묘사</li>
+                <li><strong class="text-slate-700">복음의 확장:</strong> 베들레헴을 넘어 온 세계로 뻗어 나가는 복음의 확산 과정을 장엄한 선율과 관현악적 확장으로 구현함</li>
+              </ul>
+            </div>
+
+            <!-- 곡 7 -->
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200/70 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-xs">7. 평안 중에 서로 사랑하라</span>
+                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">06'05"</span>
+              </div>
+              <ul class="text-[11px] text-slate-600 space-y-0.5 list-disc list-inside leading-relaxed">
+                <li><strong class="text-slate-700">수미상관 구조:</strong> 첫 곡의 "빛이 있으라" 모티프와 초기 선율들이 새로운 의미로 재등장하여 전 곡을 유기적으로 완결함</li>
+                <li><strong class="text-slate-700">빛의 완성:</strong> '창조의 빛'이 '성탄의 빛'으로, 다시 '평안과 사랑의 빛'으로 승화·완성되는 구조를 취함</li>
+                <li><strong class="text-slate-700">신학적 종결:</strong> 성육신의 목적이 "서로 사랑하라"는 새 계명에 있음을 선포하며, 태초의 말씀("빛이 있으라")으로 열어 예수님의 말씀("평안 중에 서로 사랑하라")으로 감동적인 대단원을 맺음</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 파트 선택 탭 -->
+        <div class="grid grid-cols-5 gap-1.5 mt-2.5">
+          <button onclick="changeCantataPart('all')" data-cantata-part="all" class="cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
+            합창
+          </button>
+          <button onclick="changeCantataPart('soprano')" data-cantata-part="soprano" class="cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
+            소프
+          </button>
+          <button onclick="changeCantataPart('alto')" data-cantata-part="alto" class="cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
+            알토
+          </button>
+          <button onclick="changeCantataPart('tenor')" data-cantata-part="tenor" class="cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
+            테너
+          </button>
+          <button onclick="changeCantataPart('bass')" data-cantata-part="bass" class="cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
+            베이스
+          </button>
+        </div>
+      </div>
+
+      <!-- 칸타타 곡 목록 리스트 -->
+      <div class="glass-card rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div id="cantataSongList" class="divide-y divide-slate-100/80 max-h-[360px] overflow-y-auto custom-scrollbar">
+          <!-- JS로 동적 렌더링 -->
+        </div>
       </div>
     </div>
 
@@ -293,6 +455,99 @@
     let songs = [];
     let isDataLoaded = false;
     let currentPart = null;
+    let currentCantataPart = 'all';
+
+    // 2026 성탄 칸타타 '빛이 있으라' 파트별 데이터
+    const CANTATA_SONGS = [
+      {
+        num: "01",
+        title: "빛이 있으라",
+        links: {
+          all: "https://www.youtube.com/watch?v=x_ap_zdG3Lw&list=PLKUCahxm6cNI&index=2&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=X3x5y8NUw_U",
+          alto: "http://www.youtube.com/watch?v=Ete6d7eNQxk",
+          tenor: "http://www.youtube.com/watch?v=Qt0v5AfAUsc",
+          bass: "http://www.youtube.com/watch?v=cI_UgOOAen4"
+        }
+      },
+      {
+        num: "02",
+        title: "말씀이 들려온다",
+        links: {
+          all: "https://www.youtube.com/watch?v=8yikvrXLbWs&list=PLKUCahxm6cNI&index=3&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=OqrRoGRWrPI",
+          alto: "http://www.youtube.com/watch?v=8F3S4qGM01Q",
+          tenor: "http://www.youtube.com/watch?v=aoIWiZYT0T0",
+          bass: "http://www.youtube.com/watch?v=ybsupcmWZRI"
+        }
+      },
+      {
+        num: "03",
+        title: "임마누엘로 오셨도다",
+        links: {
+          all: "https://www.youtube.com/watch?v=ZLNz5Z0gbiE&list=PLKUCahxm6cNI&index=4&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=rlIiZBKJ9Dc",
+          alto: "http://www.youtube.com/watch?v=QKczlhtXxV4",
+          tenor: "http://www.youtube.com/watch?v=jDhLjV4u0RY",
+          bass: "http://www.youtube.com/watch?v=mvsX4I6-iTE"
+        }
+      },
+      {
+        num: "04",
+        title: "천사들의 노래가",
+        links: {
+          all: "https://www.youtube.com/watch?v=sJVAE8Rxjhw&list=PLKUCahxm6cNI&index=5&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=Wzjwh1ia2Hk",
+          alto: "http://www.youtube.com/watch?v=YqG1baLn0a4",
+          tenor: "http://www.youtube.com/watch?v=VJboWuoKzd8",
+          bass: "http://www.youtube.com/watch?v=wzUxocsPB5g"
+        }
+      },
+      {
+        num: "05",
+        title: "영광의 찬송을 올리자",
+        links: {
+          all: "https://www.youtube.com/watch?v=Lx4alXtPhfE&list=PLKUCahxm6cNI&index=6&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=q57aHDaNg74",
+          alto: "http://www.youtube.com/watch?v=YCCCEsFMEXg",
+          tenor: "http://www.youtube.com/watch?v=OTCgfxWhVYY",
+          bass: "http://www.youtube.com/watch?v=u4bk2PX-ad0"
+        }
+      },
+      {
+        num: "06",
+        title: "가자, 경배의 길로",
+        links: {
+          all: "https://www.youtube.com/watch?v=_YHwXkFMgm8&list=PLKUCahxm6cNI&index=7&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=pG1SfCryLyQ",
+          alto: "http://www.youtube.com/watch?v=YNMPgWOb2sY",
+          tenor: "http://www.youtube.com/watch?v=1DmTaB385PA",
+          bass: "http://www.youtube.com/watch?v=x2mWOWabPbI"
+        }
+      },
+      {
+        num: "07",
+        title: "평안 중에 서로 사랑하라",
+        links: {
+          all: "https://www.youtube.com/watch?v=mhdzAMi-XoY&list=PLKUCahxm6cNI&index=8&pp=iAQB8AUB",
+          soprano: "http://www.youtube.com/watch?v=zodJVL1P86I",
+          alto: "http://www.youtube.com/watch?v=0oJJ57vJPoo",
+          tenor: "http://www.youtube.com/watch?v=mrL6ORLGWqc",
+          bass: "http://www.youtube.com/watch?v=KQFhnyYKgCE"
+        }
+      },
+      {
+        num: "08",
+        title: "가자, 경배의 길로 (축도송)",
+        links: {
+          all: "https://www.youtube.com/watch?v=EdGQOJYXCE0&list=PLKUCahxm6cNI&index=11&pp=iAQB8AUB",
+          soprano: "https://www.youtube.com/watch?v=nBD7DnSBSdQ",
+          alto: "https://www.youtube.com/watch?v=lyqMvj6W_xE",
+          tenor: "https://www.youtube.com/watch?v=mOxLtyXeMZM",
+          bass: "https://www.youtube.com/watch?v=eMGghDSDbXU"
+        }
+      }
+    ];
 
     const PART_THEMES = {
       all: {
@@ -336,8 +591,79 @@
       lucide.createIcons();
       updatePartTabUI();
       renderInitialGuide();
+      renderCantataList();
       fetchSongs();
     });
+
+    // --- 칸타타 해설 토글 제어 ---
+    function toggleCantataOverview() {
+      const content = document.getElementById('cantataOverviewContent');
+      const text = document.getElementById('cantataToggleText');
+      const icon = document.getElementById('cantataToggleIcon');
+      
+      const isHidden = content.classList.contains('hidden');
+      if (isHidden) {
+        content.classList.remove('hidden');
+        text.textContent = '해설 접기';
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        text.textContent = '해설 보기';
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    // --- 칸타타 파트 목록 제어 ---
+    function changeCantataPart(part) {
+      currentCantataPart = part;
+      renderCantataList();
+    }
+
+    function renderCantataList() {
+      const buttons = document.querySelectorAll('.cantata-part-btn');
+      buttons.forEach(btn => {
+        const part = btn.dataset.cantataPart;
+        const theme = PART_THEMES[part];
+        if (part === currentCantataPart) {
+          btn.className = `cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold border transition-all duration-200 ${theme.active}`;
+        } else {
+          btn.className = `cantata-part-btn py-1.5 text-center rounded-xl text-xs font-bold border transition-all duration-200 ${theme.inactive}`;
+        }
+      });
+
+      const container = document.getElementById('cantataSongList');
+      const theme = PART_THEMES[currentCantataPart];
+
+      container.innerHTML = CANTATA_SONGS.map(song => {
+        const link = song.links[currentCantataPart];
+        return `
+          <a 
+            href="${link}" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer"
+          >
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="text-[11px] font-bold ${theme.badge} px-2 py-0.5 rounded-lg border shrink-0 transition">
+                Track ${song.num}
+              </span>
+              <span class="text-xs sm:text-sm font-semibold text-slate-800 ${theme.hover} truncate">
+                ${song.title}
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[11px] font-medium text-slate-400 group-hover:text-slate-600 transition">듣기</span>
+              <div class="w-6 h-6 rounded-full flex items-center justify-center text-slate-300 ${theme.icon} transition">
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
 
     async function fetchSongs() {
       try {
@@ -436,7 +762,6 @@
       }).catch(err => console.error('파트별 조회수 전송 오류:', err));
     }
 
-    // 날짜가 지났는지 체크하는 헬퍼 함수 (당일 자정 기준 이전 날짜)
     function isPastDate(dateStr) {
       if (!dateStr) return false;
       const today = new Date();
@@ -472,7 +797,6 @@
         const hasLink = link && link.trim() !== '';
         const past = isPastDate(song.date);
         
-        // --- 조회수 안전 파싱 로직 ---
         let viewCount = 0;
         let viewsObj = song.views;
 
@@ -491,9 +815,7 @@
         } else if (typeof viewsObj === 'number') {
           viewCount = viewsObj;
         }
-        // ------------------------------
 
-        // 지난 날짜 스타일링 (다소 연하게 표시)
         const pastContainerClass = past ? "opacity-65 bg-slate-50/50" : "";
         const pastBadgeClass = past ? "!bg-slate-100 !text-slate-500 !border-slate-200" : theme.badge;
         const pastTextClass = past ? "!text-slate-600" : "text-slate-800";
