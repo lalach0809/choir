@@ -76,7 +76,7 @@
   <!-- Main Container -->
   <main class="max-w-2xl mx-auto px-4 sm:px-6 py-4 space-y-3.5">
 
-    <!-- 1. 찬양의 고백 글귀 (기존 대비 약 50% 슬림하게 축소) -->
+    <!-- 1. 찬양의 고백 글귀 -->
     <div class="glass-card rounded-2xl border border-slate-200/80 px-4 py-2.5 shadow-xs flex items-center gap-3">
       <div class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
         <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <!-- 2026 성탄 칸타타 섹션 (주일 찬양 섹션 바로 위) -->
+    <!-- 2026 성탄 칸타타 섹션 -->
     <div class="space-y-2.5">
       <div class="p-3.5 bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-emerald-50/90 border border-rose-200/80 rounded-2xl shadow-sm">
         <div class="flex items-center justify-between mb-2">
@@ -257,7 +257,7 @@
       </div>
     </div>
 
-    <!-- 2. 주일 찬양 섹션 및 찬양곡 목록 -->
+    <!-- 2. 주일 찬양 섹션 및 찬양곡 목록 (수정 기능 탑재) -->
     <div class="space-y-2.5">
       <div class="p-3.5 bg-gradient-to-r from-indigo-50/90 via-slate-50/80 to-violet-50/90 border border-indigo-200/80 rounded-2xl shadow-sm">
         <div class="flex items-center justify-between mb-2.5">
@@ -386,14 +386,14 @@
 
   </main>
 
-  <!-- Add Song Modal -->
+  <!-- Song Modal (곡 등록 / 곡 수정 겸용) -->
   <div id="songModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform translate-y-8 sm:translate-y-0 sm:scale-95 transition-all duration-200 max-h-[90vh] flex flex-col" id="songModalContent">
       
       <div class="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div>
-          <h3 class="text-base font-bold text-slate-900">새 찬양곡 등록</h3>
-          <p class="text-xs text-slate-500 mt-0.5">각 파트별 유튜브 링크를 입력해 주세요.</p>
+          <h3 id="modalTitle" class="text-base font-bold text-slate-900">새 찬양곡 등록</h3>
+          <p id="modalSubTitle" class="text-xs text-slate-500 mt-0.5">각 파트별 유튜브 링크를 입력해 주세요.</p>
         </div>
         <button onclick="closeSongModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
           <i data-lucide="x" class="w-4 h-4"></i>
@@ -401,6 +401,9 @@
       </div>
 
       <form id="songForm" onsubmit="saveSong(event)" class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+        <!-- 숨겨진 ID 필드 (수정 시 사용) -->
+        <input type="hidden" id="songId">
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1.5">찬양 일자</label>
@@ -442,11 +445,16 @@
         <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
           <button type="button" onclick="closeSongModal()" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">취소</button>
           <button type="submit" id="submitBtn" class="px-5 py-2.5 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm hover:shadow active:scale-95 transition-all flex items-center gap-1.5">
-            <span>저장하기</span>
+            <span id="submitBtnText">저장하기</span>
           </button>
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastMessage" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 text-white text-xs sm:text-sm px-4 py-2.5 rounded-2xl shadow-lg backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    알림 내용
   </div>
 
   <script>
@@ -594,6 +602,17 @@
       renderCantataList();
       fetchSongs();
     });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2500);
+    }
 
     // --- 칸타타 해설 토글 제어 ---
     function toggleCantataOverview() {
@@ -774,6 +793,7 @@
       return target < today;
     }
 
+    // 주일 찬양 렌더링 (각 항목별 수정 버튼 포함)
     function renderSongList() {
       if (!currentPart) return;
       const container = document.getElementById('songList');
@@ -824,9 +844,9 @@
           return `
             <div 
               onclick="openSongLink('${song.id}', '${link}', '${currentPart}')"
-              class="flex items-center justify-between gap-3.5 px-5 py-3.5 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer ${pastContainerClass}"
+              class="flex items-center justify-between gap-3.5 px-4 sm:px-5 py-3.5 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer ${pastContainerClass}"
             >
-              <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                 <span class="text-xs font-bold ${pastBadgeClass} px-2.5 py-1 rounded-lg border shrink-0 transition">
                   ${formatDate(song.date)}
                 </span>
@@ -835,11 +855,22 @@
                 </span>
               </div>
               
-              <div class="flex items-center gap-3 shrink-0">
+              <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <span class="flex items-center gap-1 text-xs text-slate-400 group-hover:text-slate-500 font-medium">
                   <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
                   <span id="views-${song.id}">${viewCount}</span>
                 </span>
+
+                <!-- 주일 찬양 수정 버튼 (이벤트 버블링 차단) -->
+                <button 
+                  type="button"
+                  onclick="event.stopPropagation(); editSong('${song.id}')"
+                  title="주일 찬양 정보 수정"
+                  class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition active:scale-90"
+                >
+                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                </button>
+
                 <div class="w-7 h-7 rounded-full flex items-center justify-center text-slate-300 ${theme.icon} transition">
                   <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
                 </div>
@@ -848,8 +879,8 @@
           `;
         } else {
           return `
-            <div class="flex items-center justify-between gap-3.5 px-5 py-3.5 bg-slate-50/40 opacity-40 cursor-not-allowed">
-              <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-3.5 px-4 sm:px-5 py-3.5 bg-slate-50/40">
+              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 opacity-50">
                 <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-1 rounded-lg shrink-0">
                   ${formatDate(song.date)}
                 </span>
@@ -857,12 +888,21 @@
                   ${song.title}
                 </span>
               </div>
-              <div class="flex items-center gap-3 shrink-0">
+              <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <span class="flex items-center gap-1 text-xs text-slate-400 font-medium">
                   <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
                   <span>${viewCount}</span>
                 </span>
                 <span class="text-[11px] text-slate-400 px-2 py-0.5 bg-slate-200/50 rounded">준비중</span>
+                <!-- 준비중인 곡도 수정 가능하도록 버튼 제공 -->
+                <button 
+                  type="button"
+                  onclick="editSong('${song.id}')"
+                  title="주일 찬양 정보 수정"
+                  class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition active:scale-90"
+                >
+                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                </button>
               </div>
             </div>
           `;
@@ -883,15 +923,64 @@
       return String(dateInput).replace(/-/g, '.');
     }
 
+    // 날짜 포맷 변환 (input[type=date] 용 'YYYY-MM-DD')
+    function formatToDateInputValue(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // 새 찬양곡 등록 모달 열기
     function openSongModal() {
       const modal = document.getElementById('songModal');
       const content = document.getElementById('songModalContent');
       document.getElementById('songForm').reset();
       
+      document.getElementById('songId').value = '';
+      document.getElementById('modalTitle').textContent = '새 찬양곡 등록';
+      document.getElementById('modalSubTitle').textContent = '각 파트별 유튜브 링크를 입력해 주세요.';
+      document.getElementById('submitBtnText').textContent = '저장하기';
+
       const now = new Date();
       const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
       document.getElementById('songDate').value = localDate;
       
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('translate-y-8', 'sm:scale-95');
+      }, 10);
+    }
+
+    // 주일 찬양 수정 모달 열기
+    function editSong(songId) {
+      const target = songs.find(s => String(s.id) === String(songId));
+      if (!target) return;
+
+      const modal = document.getElementById('songModal');
+      const content = document.getElementById('songModalContent');
+      document.getElementById('songForm').reset();
+
+      // 기존 정보 채우기
+      document.getElementById('songId').value = target.id;
+      document.getElementById('songDate').value = formatToDateInputValue(target.date);
+      document.getElementById('songTitle').value = target.title || '';
+      
+      const links = target.links || {};
+      document.getElementById('linkAll').value = links.all || '';
+      document.getElementById('linkSoprano').value = links.soprano || '';
+      document.getElementById('linkAlto').value = links.alto || '';
+      document.getElementById('linkTenor').value = links.tenor || '';
+      document.getElementById('linkBass').value = links.bass || '';
+
+      document.getElementById('modalTitle').textContent = '주일 찬양곡 수정';
+      document.getElementById('modalSubTitle').textContent = '곡명, 찬양 일자 및 파트 링크를 수정합니다.';
+      document.getElementById('submitBtnText').textContent = '수정 완료';
+
       modal.classList.remove('hidden');
       setTimeout(() => {
         modal.classList.remove('opacity-0');
@@ -909,15 +998,21 @@
       }, 200);
     }
 
+    // 저장 (등록 / 수정 공용)
     async function saveSong(e) {
       e.preventDefault();
       const submitBtn = document.getElementById('submitBtn');
+      const originalBtnHtml = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>저장 중...</span>`;
+      submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>처리 중...</span>`;
       lucide.createIcons();
 
-      const newSong = {
-        id: Date.now().toString(),
+      const editId = document.getElementById('songId').value;
+      const isEditing = Boolean(editId);
+
+      const songPayload = {
+        action: isEditing ? 'edit' : 'create',
+        id: isEditing ? editId : Date.now().toString(),
         date: document.getElementById('songDate').value,
         title: document.getElementById('songTitle').value.trim(),
         links: {
@@ -926,13 +1021,6 @@
           alto: document.getElementById('linkAlto').value.trim(),
           tenor: document.getElementById('linkTenor').value.trim(),
           bass: document.getElementById('linkBass').value.trim()
-        },
-        views: {
-          all: 0,
-          soprano: 0,
-          alto: 0,
-          tenor: 0,
-          bass: 0
         }
       };
 
@@ -941,20 +1029,37 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSong)
+          body: JSON.stringify(songPayload)
         });
 
-        songs.push(newSong);
+        if (isEditing) {
+          const idx = songs.findIndex(s => String(s.id) === String(editId));
+          if (idx !== -1) {
+            songs[idx] = {
+              ...songs[idx],
+              date: songPayload.date,
+              title: songPayload.title,
+              links: songPayload.links
+            };
+          }
+          showToast('주일 찬양 정보가 수정되었습니다.');
+        } else {
+          songPayload.views = { all: 0, soprano: 0, alto: 0, tenor: 0, bass: 0 };
+          songs.push(songPayload);
+          showToast('새 찬양곡이 등록되었습니다.');
+        }
+
         if (currentPart) {
           renderSongList();
         }
         closeSongModal();
       } catch (err) {
         console.error(err);
-        alert('저장 중 문제가 발생했습니다. 스프레드시트 상태를 확인해주세요.');
+        showToast('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>저장하기</span>`;
+        submitBtn.innerHTML = originalBtnHtml;
+        lucide.createIcons();
       }
     }
   </script>
