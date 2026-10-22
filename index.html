@@ -257,7 +257,7 @@
       </div>
     </div>
 
-    <!-- 2. 주일 찬양 섹션 및 찬양곡 목록 (수정 기능 탑재) -->
+    <!-- 2. 주일 찬양 섹션 및 찬양곡 목록 (수정 및 삭제 기능 탑재) -->
     <div class="space-y-2.5">
       <div class="p-3.5 bg-gradient-to-r from-indigo-50/90 via-slate-50/80 to-violet-50/90 border border-indigo-200/80 rounded-2xl shadow-sm">
         <div class="flex items-center justify-between mb-2.5">
@@ -442,13 +442,60 @@
           </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
-          <button type="button" onclick="closeSongModal()" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">취소</button>
-          <button type="submit" id="submitBtn" class="px-5 py-2.5 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm hover:shadow active:scale-95 transition-all flex items-center gap-1.5">
-            <span id="submitBtnText">저장하기</span>
-          </button>
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2.5">
+          <!-- 모달 내부 삭제 버튼 (수정 모드일 때만 활성화) -->
+          <div>
+            <button 
+              type="button" 
+              id="modalDeleteBtn" 
+              onclick="handleModalDelete()" 
+              class="hidden px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-600 hover:text-white hover:bg-rose-600 rounded-xl border border-rose-200 hover:border-transparent transition active:scale-95 flex items-center gap-1.5"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>삭제</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <button type="button" onclick="closeSongModal()" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition">취소</button>
+            <button type="submit" id="submitBtn" class="px-5 py-2.5 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm hover:shadow active:scale-95 transition-all flex items-center gap-1.5">
+              <span id="submitBtnText">저장하기</span>
+            </button>
+          </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal (안전한 삭제 확인 팝업) -->
+  <div id="deleteConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-all duration-200 p-6 space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100 shadow-sm">
+        <i data-lucide="trash-2" class="w-6 h-6"></i>
+      </div>
+      <div class="text-center space-y-1">
+        <h3 class="text-base font-bold text-slate-900">찬양곡 삭제</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          <strong id="deleteTargetTitle" class="text-slate-800 font-semibold"></strong> 곡을 삭제하시겠습니까?<br>삭제된 데이터는 복구할 수 없습니다.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 pt-2">
+        <button 
+          type="button" 
+          onclick="closeDeleteConfirmModal()" 
+          class="w-full py-2.5 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+        >
+          취소
+        </button>
+        <button 
+          type="button" 
+          id="confirmDeleteBtn" 
+          onclick="executeDelete()" 
+          class="w-full py-2.5 text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-sm shadow-rose-200 transition active:scale-95 flex items-center justify-center gap-1.5"
+        >
+          <span id="confirmDeleteBtnText">삭제하기</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -464,6 +511,7 @@
     let isDataLoaded = false;
     let currentPart = null;
     let currentCantataPart = 'all';
+    let targetSongToDelete = null; // 삭제할 곡 객체 임시 보관
 
     // 2026 성탄 칸타타 '빛이 있으라' 파트별 데이터
     const CANTATA_SONGS = [
@@ -793,7 +841,7 @@
       return target < today;
     }
 
-    // 주일 찬양 렌더링 (각 항목별 수정 버튼 포함)
+    // 주일 찬양 렌더링 (각 항목별 수정 및 삭제 버튼 포함)
     function renderSongList() {
       if (!currentPart) return;
       const container = document.getElementById('songList');
@@ -844,10 +892,10 @@
           return `
             <div 
               onclick="openSongLink('${song.id}', '${link}', '${currentPart}')"
-              class="flex items-center justify-between gap-3.5 px-4 sm:px-5 py-3.5 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer ${pastContainerClass}"
+              class="flex items-center justify-between gap-2.5 sm:gap-3.5 px-3.5 sm:px-5 py-3.5 ${theme.hover} active:bg-slate-100/70 transition duration-150 group cursor-pointer ${pastContainerClass}"
             >
-              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <span class="text-xs font-bold ${pastBadgeClass} px-2.5 py-1 rounded-lg border shrink-0 transition">
+              <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <span class="text-xs font-bold ${pastBadgeClass} px-2 sm:px-2.5 py-1 rounded-lg border shrink-0 transition">
                   ${formatDate(song.date)}
                 </span>
                 <span class="text-sm sm:text-base font-semibold ${pastTextClass} ${theme.hover} truncate">
@@ -855,20 +903,30 @@
                 </span>
               </div>
               
-              <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <span class="flex items-center gap-1 text-xs text-slate-400 group-hover:text-slate-500 font-medium">
+              <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                <span class="flex items-center gap-1 text-xs text-slate-400 group-hover:text-slate-500 font-medium mr-1">
                   <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
                   <span id="views-${song.id}">${viewCount}</span>
                 </span>
 
-                <!-- 주일 찬양 수정 버튼 (이벤트 버블링 차단) -->
+                <!-- 주일 찬양 수정 버튼 -->
                 <button 
                   type="button"
                   onclick="event.stopPropagation(); editSong('${song.id}')"
                   title="주일 찬양 정보 수정"
                   class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition active:scale-90"
                 >
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                </button>
+
+                <!-- 주일 찬양 삭제 버튼 -->
+                <button 
+                  type="button"
+                  onclick="event.stopPropagation(); promptDeleteSong('${song.id}')"
+                  title="주일 찬양 삭제"
+                  class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition active:scale-90"
+                >
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
 
                 <div class="w-7 h-7 rounded-full flex items-center justify-center text-slate-300 ${theme.icon} transition">
@@ -879,29 +937,40 @@
           `;
         } else {
           return `
-            <div class="flex items-center justify-between gap-3.5 px-4 sm:px-5 py-3.5 bg-slate-50/40">
-              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 opacity-50">
-                <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-1 rounded-lg shrink-0">
+            <div class="flex items-center justify-between gap-2.5 sm:gap-3.5 px-3.5 sm:px-5 py-3.5 bg-slate-50/40">
+              <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 opacity-50">
+                <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2 sm:px-2.5 py-1 rounded-lg shrink-0">
                   ${formatDate(song.date)}
                 </span>
                 <span class="text-sm sm:text-base font-medium text-slate-500 truncate">
                   ${song.title}
                 </span>
               </div>
-              <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <span class="flex items-center gap-1 text-xs text-slate-400 font-medium">
+              <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                <span class="flex items-center gap-1 text-xs text-slate-400 font-medium mr-1">
                   <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
                   <span>${viewCount}</span>
                 </span>
-                <span class="text-[11px] text-slate-400 px-2 py-0.5 bg-slate-200/50 rounded">준비중</span>
-                <!-- 준비중인 곡도 수정 가능하도록 버튼 제공 -->
+                <span class="text-[11px] text-slate-400 px-1.5 py-0.5 bg-slate-200/50 rounded">준비중</span>
+                
+                <!-- 수정 버튼 -->
                 <button 
                   type="button"
                   onclick="editSong('${song.id}')"
                   title="주일 찬양 정보 수정"
                   class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition active:scale-90"
                 >
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                </button>
+
+                <!-- 삭제 버튼 -->
+                <button 
+                  type="button"
+                  onclick="promptDeleteSong('${song.id}')"
+                  title="주일 찬양 삭제"
+                  class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition active:scale-90"
+                >
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
               </div>
             </div>
@@ -923,7 +992,6 @@
       return String(dateInput).replace(/-/g, '.');
     }
 
-    // 날짜 포맷 변환 (input[type=date] 용 'YYYY-MM-DD')
     function formatToDateInputValue(dateStr) {
       if (!dateStr) return '';
       const d = new Date(dateStr);
@@ -944,6 +1012,9 @@
       document.getElementById('modalTitle').textContent = '새 찬양곡 등록';
       document.getElementById('modalSubTitle').textContent = '각 파트별 유튜브 링크를 입력해 주세요.';
       document.getElementById('submitBtnText').textContent = '저장하기';
+      
+      // 등록 모드에서는 삭제 버튼 숨김
+      document.getElementById('modalDeleteBtn').classList.add('hidden');
 
       const now = new Date();
       const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
@@ -981,6 +1052,9 @@
       document.getElementById('modalSubTitle').textContent = '곡명, 찬양 일자 및 파트 링크를 수정합니다.';
       document.getElementById('submitBtnText').textContent = '수정 완료';
 
+      // 수정 모드일 때는 삭제 버튼 노출
+      document.getElementById('modalDeleteBtn').classList.remove('hidden');
+
       modal.classList.remove('hidden');
       setTimeout(() => {
         modal.classList.remove('opacity-0');
@@ -996,6 +1070,82 @@
       setTimeout(() => {
         modal.classList.add('hidden');
       }, 200);
+    }
+
+    // 모달 내 '삭제' 버튼 클릭 핸들러
+    function handleModalDelete() {
+      const songId = document.getElementById('songId').value;
+      if (!songId) return;
+      closeSongModal();
+      setTimeout(() => {
+        promptDeleteSong(songId);
+      }, 220);
+    }
+
+    // 삭제 확인 모달 열기
+    function promptDeleteSong(songId) {
+      const target = songs.find(s => String(s.id) === String(songId));
+      if (!target) return;
+
+      targetSongToDelete = target;
+      document.getElementById('deleteTargetTitle').textContent = `「${target.title || '선택한 곡'}」`;
+
+      const modal = document.getElementById('deleteConfirmModal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('.transform').classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeDeleteConfirmModal() {
+      const modal = document.getElementById('deleteConfirmModal');
+      modal.classList.add('opacity-0');
+      modal.querySelector('.transform').classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        targetSongToDelete = null;
+      }, 200);
+    }
+
+    // 삭제 실행 (Apps Script에 action: 'delete' 전송 및 로컬 제거)
+    async function executeDelete() {
+      if (!targetSongToDelete) return;
+      const songId = String(targetSongToDelete.id);
+      const songTitle = targetSongToDelete.title;
+
+      const deleteBtn = document.getElementById('confirmDeleteBtn');
+      const deleteText = document.getElementById('confirmDeleteBtnText');
+      deleteBtn.disabled = true;
+      deleteText.textContent = '삭제 중...';
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            id: songId
+          })
+        });
+
+        // 로컬 목록에서 제거
+        songs = songs.filter(s => String(s.id) !== songId);
+
+        if (currentPart) {
+          renderSongList();
+        }
+
+        closeDeleteConfirmModal();
+        showToast(`「${songTitle}」 찬양곡이 삭제되었습니다.`);
+      } catch (err) {
+        console.error('삭제 요청 에러:', err);
+        showToast('곡 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      } finally {
+        deleteBtn.disabled = false;
+        deleteText.textContent = '삭제하기';
+      }
     }
 
     // 저장 (등록 / 수정 공용)
